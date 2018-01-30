@@ -14,19 +14,30 @@
 - name: Disable SELinux
   selinux:
     state: disabled
-  notify: reboot server # machine needs to restart for selinux changes to take effect
+- name: Reboot Server
+  command: /sbin/shutdown -r now "Ansible changes require reboot"
+- name: Wait for server to finish rebooting
+  local_action: wait_for host= "{{ inventory_hostname }}" search_regex=OpenSSH port=22 timeout=300
 - name: download latest asterisk # currently version 15.1.5
   get_url:
     url: https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-15-current.tar.gz
     dest: /usr/local/src/
-    checksum: sha256:f1ef579fa635a54c6c149b47f23f3f022e5e1ad0ef762122b2b2f2410c4fa759
+    checksum: sha256:5ab2c80e3cb1a933013415d49dbb100e5d2045aeaf926f8eb0ed3b77460a6d83
 - name: Extract asterisk installation
   unarchive:
     src: /usr/local/src/asterisk-15-current.tar.gz
     dest: /usr/local/src/
     remote_src: yes
+- name: get path to installation directory
+  stat:
+    path: /usr/local/src/*
+  register: install_path
+- name: print variable
+  debug:
+    var: install_path.stat
+    verbosity: 4
 - name: Build asterisk from source
-  command: "{{ item }} chdir=/usr/local/src/asterisk-15.1.5/"
+  command: "{{ item }} chdir=/usr/local/src/asterisk-15.2.0/"
   with_items:
     - contrib/scripts/install_prereq install
     - ./configure
@@ -58,8 +69,9 @@
     owner: root
     group: root
     mode: 0644
+    backup: yes
   with_fileglob:
-    - path/to/roles/asterisk/configs/* # all files in this directory will be copied over
+    - home/thomas/ansible/voip_deploy/insall/roles/asterisk/configs/*" # all files in this directory will be copied over
 - name: restart asterisk service
   service:
     name: asterisk

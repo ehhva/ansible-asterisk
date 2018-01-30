@@ -1,0 +1,15 @@
+---
+#
+# Playbook to install the asterisk server with a set of configuration files
+- hosts: voip
+  remote_user: ansible
+  become: yes
+  tasks:
+  - name: get uri for sha256 checksum
+    uri:
+      url: http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-15-current.sha256
+      return_content: yes
+    register: webpage
+  - name: get content from webpage
+    debug:
+      msg: "webpage: {{ webpage.stdout }}"
