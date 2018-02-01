@@ -65,8 +65,8 @@
     owner: root
     group: root
   with_items:
-    - '/home/thomas/ansible/voip_deploy/install/roles/asterisk/configs/pjsip.conf'
-    - '/home/thomas/ansible/voip_deploy/install/roles/asterisk/configs/extensions.conf'
+    - 'pjsip.conf'
+    - 'extensions.conf'
 - name: restart asterisk service
   service:
     name: asterisk
